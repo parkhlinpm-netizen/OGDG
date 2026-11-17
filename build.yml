@@ -1,0 +1,56 @@
+name: Build and deploy the website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "report/**"
+      - "scripts/**"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:        # adds the "Run workflow" button in the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Build the website from the Excel master
+        run: |
+          test -f data/master.xlsx || { echo "data/master.xlsx not found"; exit 1; }
+          mkdir -p public
+          REPORT=$(ls -t report/*.pdf 2>/dev/null | head -n 1 || true)
+          python scripts/make_ogdg_site.py data/master.xlsx public/index.html $REPORT
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
