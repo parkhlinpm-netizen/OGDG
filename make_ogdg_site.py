@@ -477,7 +477,7 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 .sheet h1 .accent{color:#9a6b3c}
 .sheet h1 .hd{display:none}
 .sheet .kick{color:var(--sage)}
-@media(min-width:861px){.sheet h1{font-size:40px;line-height:1.15}}
+@media(min-width:861px){.sheet h1{font-size:44px;line-height:1.15}}
 @media(max-width:860px){.sheet h1 .hm{display:none}.sheet h1 .hd{display:inline}}
 /* ---- left column as set; dashboard back to full size and stretched to the same height as the text column ---- */
 .sheet .sheet-inner{grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:56px;align-items:stretch}
@@ -507,6 +507,15 @@ nav.tabs button.active{border-bottom-color:var(--cream)}
 .legend{border-color:var(--sage)}.legend::before,.legend::after{border-color:var(--sage)}
 .sechead{border-bottom-color:var(--sage)}
 .ttile .bar i{background:var(--sage)}.ttile:hover{background:var(--sage)}.ttile:hover .bar i{background:var(--cream)}
+
+/* ---- home: hero back to about 400 px, tiles keep "N datasets" + bar, brown code/number row removed ---- */
+@media(min-width:861px){.sheet h1{font-size:42px}}
+.ttile .tc{display:none}
+.ttile{padding:17px 18px 15px;min-height:104px;gap:6px}
+.ttile .tn{font-size:16.5px;line-height:1.25}
+.ttile .tk{margin-top:auto;font-size:12.5px}
+.ttile .bar{margin-top:6px}
+.homesection{margin-top:46px}
 </style>
 </head>
 <body>
@@ -544,7 +553,7 @@ const CHEV = '<svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill=
    filter values stay in English. */
 const UI = {
  en:{datasets:"Datasets",usecases:"Use cases",brandFull:"Open Geospatial Data Glossary · AfDB DI4A",
-  heroA:"Open geospatial data",kick:"Data Innovation for Africa · AfDB Statistics Department",title:"Open Geospatial Data Glossary",lede:"Open geospatial datasets and documented use cases, <br>curated for <mark>African development work</mark>.",legendH:"At a glance",howTo:"Search by keyword, or browse by theme and sector below.",dsOne:"dataset",upd:"Last updated",seeDs:"All datasets",seeUc:"All use cases",ofTotal:"of datasets",heroB:"for African development policy",heroTag:"Find a dataset, or see how it has been used in documented policy work.",
+  heroA:"Open geospatial data",kick:"Data Innovation for Africa · AfDB Statistics Department",title:"Open Geospatial Data Glossary",lede:"Open geospatial datasets and documented use cases, <br>curated for <mark>African development work</mark>.",legendH:"At a glance",howTo:"Search by keyword, or browse by theme and sector below.",dsOne:"dataset",upd:"Last updated",seeDs:"All datasets",seeUc:"All use cases",ofTotal:"of datasets",heroB:"for African development",heroTag:"Find a dataset, or see how it has been applied in documented use cases.",
   searchAll:"Search datasets, use cases and countries…",searchShort:"Search…",nDatasets:"datasets",nThemes:"themes",nUsecases:"use cases",nSectors:"sectors",
   byTheme:"Browse datasets by theme",bySector:"Browse use cases by sector",
   highPrio:"High-priority datasets",highPrioSub:"The team's indicative pick of datasets to explore first.",prioTip:"How priority is set",infoTip:"What the grades mean",
@@ -570,7 +579,7 @@ const UI = {
   viewCards:"Cards",viewList:"List",name:"Name",theme:"Theme",titleCol:"Title",sector:"Sector",
   report:"Report",reportFull:"Download the report (PDF)",lastUpdated:"Last updated",showAll:"Show all"},
  fr:{datasets:"Jeux de données",usecases:"Cas d'usage",brandFull:"Glossaire des données géospatiales ouvertes · BAD DI4A",
-  heroA:"Données géospatiales ouvertes",kick:"Data Innovation for Africa · Département des statistiques de la BAD",title:"Glossaire des données géospatiales ouvertes",lede:"Jeux de données géospatiales ouverts et cas d'usage documentés, <br>sélectionnés pour le <mark>développement africain</mark>.",legendH:"En un coup d'œil",howTo:"Recherchez par mot-clé, ou parcourez par thème et secteur ci-dessous.",dsOne:"jeu de données",upd:"Dernière mise à jour",seeDs:"Tous les jeux de données",seeUc:"Tous les cas d'usage",ofTotal:"des jeux de données",heroB:"pour les politiques de développement en Afrique",heroTag:"Trouvez un jeu de données, ou voyez comment il a été utilisé dans des travaux de politique publique documentés.",
+  heroA:"Données géospatiales ouvertes",kick:"Data Innovation for Africa · Département des statistiques de la BAD",title:"Glossaire des données géospatiales ouvertes",lede:"Jeux de données géospatiales ouverts et cas d'usage documentés, <br>sélectionnés pour le <mark>développement africain</mark>.",legendH:"En un coup d'œil",howTo:"Recherchez par mot-clé, ou parcourez par thème et secteur ci-dessous.",dsOne:"jeu de données",upd:"Dernière mise à jour",seeDs:"Tous les jeux de données",seeUc:"Tous les cas d'usage",ofTotal:"des jeux de données",heroB:"pour le développement africain",heroTag:"Trouvez un jeu de données, ou voyez comment il a été appliqué dans des cas d'usage documentés.",
   searchAll:"Rechercher jeux de données, cas d'usage et pays…",searchShort:"Rechercher…",nDatasets:"jeux de données",nThemes:"thèmes",nUsecases:"cas d'usage",nSectors:"secteurs",
   byTheme:"Parcourir les jeux de données par thème",bySector:"Parcourir les cas d'usage par secteur",
   highPrio:"Jeux de données prioritaires",highPrioSub:"Sélection indicative de l'équipe : les jeux de données à explorer en premier.",prioTip:"Comment la priorité est établie",infoTip:"Signification des niveaux",
@@ -709,7 +718,7 @@ function renderHome(){
   const sectors = Object.keys(SECTOR_COLORS).filter(s=>sectorCount(s));
   const nDs = DATA.datasets.length, maxT = Math.max(...DATA.themes.map(t=>DATA.datasets.filter(d=>d.theme===t.name).length));
   const lede = T('lede');
-  const heroM = T('heroB').match(/^(\S+)\s+([\s\S]+)$/), heroFirst = heroM?heroM[1]:'', heroRest = heroM?heroM[2]:T('heroB');
+  const heroM = T('heroB').match(/^(\S+)\s+([\s\S]+)$/), heroFirst = (heroM && state.lang==='en')?heroM[1]:'', heroRest = (heroM && state.lang==='en')?heroM[2]:T('heroB');
   return `
   <section class="sheet">${TOPO}<div class="sheet-inner">
     <div>
