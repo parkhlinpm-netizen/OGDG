@@ -473,6 +473,25 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 
 .sheet .lede br{display:none}@media(min-width:700px){.sheet .lede br{display:inline}}
 .sheet .lede mark{white-space:nowrap;background:none;color:#9a6b3c;font-weight:600;padding:0}
+/* ---- original stable layout; heading wording restored; label in report green ---- */
+.sheet h1 .accent{color:#9a6b3c}
+.sheet h1 .hd{display:none}
+.sheet .kick{color:var(--sage)}
+@media(min-width:861px){.sheet h1{font-size:40px;line-height:1.15}}
+@media(max-width:860px){.sheet h1 .hm{display:none}.sheet h1 .hd{display:inline}}
+/* ---- left column as set; dashboard back to full size and stretched to the same height as the text column ---- */
+.sheet .sheet-inner{grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:56px;align-items:stretch}
+@media(max-width:860px){.sheet .sheet-inner{grid-template-columns:1fr;gap:32px}}
+.sheet .lede{font-size:16px}
+.sheet .legend{padding:18px 22px 14px;display:flex;flex-direction:column}
+.sheet .legend .lh{padding-bottom:8px;margin-bottom:0}
+.sheet .legend .row{padding:0;flex:1;align-items:center}
+.sheet .legend .row span{font-size:14px}
+.sheet .legend .row b{font-size:28px}
+.sheet .stamp{text-align:left}
+@media(max-width:860px){.sheet .legend .row{padding:9px 0;flex:none}}
+@media(min-width:641px) and (max-width:860px){.sheet h1{font-size:36px}}
+@media(max-width:640px){.sheet h1{font-size:28px}}
 
 /* ---- palette B: report sage ---- */
 :root{--paper:#f6f7f4;--line:#dfe4e0;--gold:#9a6b3c;--contour:#486d58;--sage:#486d58;--sage-ink:#2f4a3b;--cream:#f1e3cf}
@@ -690,12 +709,13 @@ function renderHome(){
   const sectors = Object.keys(SECTOR_COLORS).filter(s=>sectorCount(s));
   const nDs = DATA.datasets.length, maxT = Math.max(...DATA.themes.map(t=>DATA.datasets.filter(d=>d.theme===t.name).length));
   const lede = T('lede');
+  const heroM = T('heroB').match(/^(\S+)\s+([\s\S]+)$/), heroFirst = heroM?heroM[1]:'', heroRest = heroM?heroM[2]:T('heroB');
   return `
   <section class="sheet">${TOPO}<div class="sheet-inner">
     <div>
       <div class="kick">${T('kick')}</div>
-      <h1>${T('title')}</h1>
-      <p class="lede">${lede}</p>
+      <h1>${T('heroA')}<span class="hm"> ${heroFirst}</span><br><span class="accent"><span class="hd">${heroFirst} </span>${heroRest}</span></h1>
+      <p class="lede">${T('heroTag')}</p>
       <div class="herosearch">${SVG_SEARCH}<input id="homeq" placeholder="${T('searchAll')}"></div>
       <div class="stamp">${T('upd')} · ${esc(DATA.meta.built)}</div>
     </div>
