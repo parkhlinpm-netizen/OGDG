@@ -168,6 +168,22 @@ def load(path):
             useCases=[]))
     dmap = {d["id"]: d for d in datasets}
 
+    # Priority sheet: composite score per dataset (orders the home-page "High-priority datasets")
+    scores = {}
+    if "Priority" in wb.sheetnames:
+        prows = list(wb["Priority"].iter_rows(values_only=True))
+        hdr = next((i for i, r in enumerate(prows) if r and txt(r[0]) == "ID" and "Composite" in [txt(x) for x in r]), None)
+        if hdr is not None:
+            ci = [txt(x) for x in prows[hdr]].index("Composite")
+            for r in prows[hdr + 1:]:
+                if r and r[0]:
+                    try:
+                        scores[txt(r[0])] = round(float(r[ci]), 2)
+                    except (TypeError, ValueError):
+                        pass
+    for d in datasets:
+        d["score"] = scores.get(d["id"], 0)
+
     # Use cases
     ws = wb["Use_Cases"]
     H = [txt(c.value) for c in ws[1]]
@@ -721,7 +737,7 @@ const contentNote = () => T('contentNote') ? `<div class="langnote">${T('content
 /* ---------- home ---------- */
 function renderHome(){
   const top = DATA.datasets.filter(d=>d.stars===5)
-    .sort((a,b)=>b.useCases.length-a.useCases.length || a.name.localeCompare(b.name));   // most-cited first; ties A–Z
+    .sort((a,b)=>(b.score||0)-(a.score||0) || b.useCases.length-a.useCases.length || a.name.localeCompare(b.name));   // priority score, then use cases, then A–Z
   const hiRel = DATA.usecases.filter(u=>u.relevanceTier==='High'&&u.replicabilityTier==='High')
     .sort((a,b)=>(DIFF_ORDER[a.difficultyTier]??9)-(DIFF_ORDER[b.difficultyTier]??9) || (b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
   const sectorCount = s => DATA.usecases.filter(u=>u.sectors.includes(s)).length;
