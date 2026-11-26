@@ -720,7 +720,8 @@ const contentNote = () => T('contentNote') ? `<div class="langnote">${T('content
 
 /* ---------- home ---------- */
 function renderHome(){
-  const top = DATA.datasets.filter(d=>d.stars===5);
+  const top = DATA.datasets.filter(d=>d.stars===5)
+    .sort((a,b)=>b.useCases.length-a.useCases.length || a.name.localeCompare(b.name));   // most-cited first; ties A–Z
   const hiRel = DATA.usecases.filter(u=>u.relevanceTier==='High'&&u.replicabilityTier==='High')
     .sort((a,b)=>(DIFF_ORDER[a.difficultyTier]??9)-(DIFF_ORDER[b.difficultyTier]??9) || (b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
   const sectorCount = s => DATA.usecases.filter(u=>u.sectors.includes(s)).length;
