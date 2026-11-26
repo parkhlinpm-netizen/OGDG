@@ -470,6 +470,8 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 .secgrid .sc:hover{background:var(--green-tint)}
 .secgrid .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;vertical-align:1px}
 .homesection .sectionsub{margin:10px 0 14px}
+.homesection .secnote{margin:8px 0 12px;font-size:12.5px}
+.secnote+.secgrid{border-top:1px solid var(--line)}
 
 .sheet .lede br{display:none}@media(min-width:700px){.sheet .lede br{display:inline}}
 .sheet .lede mark{white-space:nowrap;background:none;color:#9a6b3c;font-weight:600;padding:0}
@@ -496,7 +498,7 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 /* ---- palette: original site colours (deep green + gold) ---- */
 :root{--accent:#e0a467;--contour:#cfe0d4}
 .searchband{background:transparent;border:0;border-radius:0;padding:12px 20px 12px;margin:0 0 18px}
-header.topbar{background:var(--green-deep);border-bottom:1px solid rgba(255,255,255,.08)}
+header.topbar{background:var(--green-deep);border-bottom:1px solid rgba(255,255,255,.28)}
 .sheet{background:var(--green-deep);border-bottom:0}.sheet .topo{opacity:.16}
 .sheet .kick{color:var(--accent)}
 .sheet h1{color:#fff}.sheet h1 .accent{color:var(--accent)}
@@ -519,6 +521,10 @@ header.topbar{background:var(--green-deep);border-bottom:1px solid rgba(255,255,
 .ttile .tk{margin-top:auto;font-size:12.5px}
 .ttile .bar{margin-top:6px}
 .homesection{margin-top:46px}
+.sechead{border-bottom:0!important;padding-bottom:0}
+.themegrid,.secgrid{border-top:1px solid var(--green-deep)!important}
+.sechead+.themegrid{margin-top:12px}
+.sechead+.secnote{margin-top:6px}
 </style>
 </head>
 <body>
@@ -556,7 +562,7 @@ const CHEV = '<svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill=
    filter values stay in English. */
 const UI = {
  en:{datasets:"Datasets",usecases:"Use cases",brandFull:"Open Geospatial Data Glossary · AfDB DI4A",
-  heroA:"Open geospatial data",kick:"Data Innovation for Africa · AfDB Statistics Department",title:"Open Geospatial Data Glossary",lede:"Open geospatial datasets and documented use cases, <br>curated for <mark>African development work</mark>.",legendH:"At a glance",howTo:"Search by keyword, or browse by theme and sector below.",dsOne:"dataset",upd:"Last updated",seeDs:"All datasets",seeUc:"All use cases",ofTotal:"of datasets",heroB:"for African development",heroTag:"Find a dataset, or see how it has been applied in documented use cases.",
+  heroA:"Open geospatial data",kick:"Data Innovation for Africa · AfDB Statistics Department",title:"Open Geospatial Data Glossary",lede:"Open geospatial datasets and documented use cases, <br>curated for <mark>African development work</mark>.",legendH:"At a glance",secNote:"Each use case can belong to up to two sectors.",howTo:"Search by keyword, or browse by theme and sector below.",dsOne:"dataset",upd:"Last updated",seeDs:"All datasets",seeUc:"All use cases",ofTotal:"of datasets",heroB:"for African development",heroTag:"Find a dataset, or see how it has been applied in documented use cases.",
   searchAll:"Search datasets, use cases and countries…",searchShort:"Search…",nDatasets:"datasets",nThemes:"themes",nUsecases:"use cases",nSectors:"sectors",
   byTheme:"Browse datasets by theme",bySector:"Browse use cases by sector",
   highPrio:"High-priority datasets",highPrioSub:"The team's indicative pick of datasets to explore first.",prioTip:"How priority is set",infoTip:"What the grades mean",
@@ -582,7 +588,7 @@ const UI = {
   viewCards:"Cards",viewList:"List",name:"Name",theme:"Theme",titleCol:"Title",sector:"Sector",
   report:"Report",reportFull:"Download the report (PDF)",lastUpdated:"Last updated",showAll:"Show all"},
  fr:{datasets:"Jeux de données",usecases:"Cas d'usage",brandFull:"Glossaire des données géospatiales ouvertes · BAD DI4A",
-  heroA:"Données géospatiales ouvertes",kick:"Data Innovation for Africa · Département des statistiques de la BAD",title:"Glossaire des données géospatiales ouvertes",lede:"Jeux de données géospatiales ouverts et cas d'usage documentés, <br>sélectionnés pour le <mark>développement africain</mark>.",legendH:"En un coup d'œil",howTo:"Recherchez par mot-clé, ou parcourez par thème et secteur ci-dessous.",dsOne:"jeu de données",upd:"Dernière mise à jour",seeDs:"Tous les jeux de données",seeUc:"Tous les cas d'usage",ofTotal:"des jeux de données",heroB:"pour le développement africain",heroTag:"Trouvez un jeu de données, ou voyez comment il a été appliqué dans des cas d'usage documentés.",
+  heroA:"Données géospatiales ouvertes",kick:"Data Innovation for Africa · Département des statistiques de la BAD",title:"Glossaire des données géospatiales ouvertes",lede:"Jeux de données géospatiales ouverts et cas d'usage documentés, <br>sélectionnés pour le <mark>développement africain</mark>.",legendH:"En un coup d'œil",secNote:"Un cas d'usage peut relever de deux secteurs au plus.",howTo:"Recherchez par mot-clé, ou parcourez par thème et secteur ci-dessous.",dsOne:"jeu de données",upd:"Dernière mise à jour",seeDs:"Tous les jeux de données",seeUc:"Tous les cas d'usage",ofTotal:"des jeux de données",heroB:"pour le développement africain",heroTag:"Trouvez un jeu de données, ou voyez comment il a été appliqué dans des cas d'usage documentés.",
   searchAll:"Rechercher jeux de données, cas d'usage et pays…",searchShort:"Rechercher…",nDatasets:"jeux de données",nThemes:"thèmes",nUsecases:"cas d'usage",nSectors:"secteurs",
   byTheme:"Parcourir les jeux de données par thème",bySector:"Parcourir les cas d'usage par secteur",
   highPrio:"Jeux de données prioritaires",highPrioSub:"Sélection indicative de l'équipe : les jeux de données à explorer en premier.",prioTip:"Comment la priorité est établie",infoTip:"Signification des niveaux",
@@ -717,7 +723,7 @@ function renderHome(){
   const top = DATA.datasets.filter(d=>d.stars===5);
   const hiRel = DATA.usecases.filter(u=>u.relevanceTier==='High'&&u.replicabilityTier==='High')
     .sort((a,b)=>(DIFF_ORDER[a.difficultyTier]??9)-(DIFF_ORDER[b.difficultyTier]??9) || (b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
-  const sectorCount = s => DATA.usecases.filter(u=>primary(u)===s).length;
+  const sectorCount = s => DATA.usecases.filter(u=>u.sectors.includes(s)).length;
   const sectors = Object.keys(SECTOR_COLORS).filter(s=>sectorCount(s));
   const nDs = DATA.datasets.length, maxT = Math.max(...DATA.themes.map(t=>DATA.datasets.filter(d=>d.theme===t.name).length));
   const lede = T('lede');
@@ -744,6 +750,7 @@ function renderHome(){
       return `<div class="ttile" data-theme="${esc(t.name)}"><div class="tc"><span>${esc(t.code)}</span><span>${String(n).padStart(2,'0')}</span></div>
         <div class="tn">${esc(L(t.name))}</div><div class="tk">${n} ${n===1?T('dsOne'):T('nDatasets')}</div><div class="bar"><i style="width:${Math.round(n/maxT*100)}%"></i></div></div>`;}).join('')}</div></div>
   <div class="homesection"><div class="sechead"><h2>${T('bySector')}</h2><span class="seemore" onclick="go('usecases')">${T('seeUc')} →</span></div>
+    <div class="sectionsub secnote">${T('secNote')}</div>
     <div class="secgrid">${sectors.map(sc=>`<div class="sc" data-sector="${esc(sc)}"><span><i class="dot" style="background:${SECTOR_COLORS[sc]||'#888'}"></i>${esc(L(sc))}</span><b>${sectorCount(sc)}</b></div>`).join('')}</div></div>
   <div class="homesection"><h2>${T('highPrio')}<span class="infowrap"><button class="infobtn ${state.info?'on':''}" id="infobtn" title="${esc(T('prioTip'))}">i</button>${state.info?`<div class="pop" id="pop">${T('prioInfo')}</div>`:''}</span></h2>
     <div class="sectionsub">${T('highPrioSub')}</div>
@@ -829,7 +836,7 @@ function ucFiltered(skip){
   const f={...state.uc.f}, q=state.uc.q.toLowerCase();
   if(skip) delete f[skip];
   return DATA.usecases.filter(u=>
-    (!f.sector?.length || f.sector.includes(primary(u))) &&
+    (!f.sector?.length || u.sectors.some(s=>f.sector.includes(s))) &&
     (!f.relevanceTier?.length || f.relevanceTier.includes(u.relevanceTier)) &&
     (!f.replicabilityTier?.length || f.replicabilityTier.includes(u.replicabilityTier)) &&
     (!f.difficultyTier?.length || f.difficultyTier.includes(u.difficultyTier)) &&
@@ -845,7 +852,7 @@ function renderUseCases(){
   const sorted=[...list].sort((a,b)=> dir*(b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
   const cnt=(fn)=>DATA.usecases.filter(fn).length;
   const cntK=(key,fn)=>ucFiltered(key).filter(fn).length;  // facet count: all other active filters applied
-  const sectors=Object.keys(SECTOR_COLORS).filter(s=>cnt(u=>primary(u)===s));
+  const sectors=Object.keys(SECTOR_COLORS).filter(s=>cnt(u=>u.sectors.includes(s)));
   const types=[...new Set(DATA.usecases.flatMap(u=>u.types))].sort();
   const years=[...new Set(DATA.usecases.map(u=>u.year))].sort().reverse();
   const countries=[...new Set(DATA.usecases.flatMap(u=>u.countries))].sort();
