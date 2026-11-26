@@ -579,7 +579,7 @@ const CHEV = '<svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill=
 const UI = {
  en:{datasets:"Datasets",usecases:"Use cases",brandFull:"Open Geospatial Data Glossary · AfDB DI4A",
   heroA:"Open geospatial data",kick:"Data Innovation for Africa · AfDB Statistics Department",title:"Open Geospatial Data Glossary",lede:"Open geospatial datasets and documented use cases, <br>curated for <mark>African development work</mark>.",legendH:"At a glance",secNote:"Each use case can belong to up to two sectors.",howTo:"Search by keyword, or browse by theme and sector below.",dsOne:"dataset",upd:"Last updated",seeDs:"All datasets",seeUc:"All use cases",ofTotal:"of datasets",heroB:"for African development",heroTag:"Find a dataset, or see how it has been applied in documented use cases.",
-  searchAll:"Search datasets, use cases and countries…",searchShort:"Search…",nDatasets:"datasets",nThemes:"themes",nUsecases:"use cases",nSectors:"sectors",
+  searchAll:"Search datasets, use cases and countries…",sortRel:"Relevance",searchShort:"Search…",nDatasets:"datasets",nThemes:"themes",nUsecases:"use cases",nSectors:"sectors",
   byTheme:"Browse datasets by theme",bySector:"Browse use cases by sector",
   highPrio:"High-priority datasets",highPrioSub:"The team's indicative pick of datasets to explore first.",prioTip:"How priority is set",infoTip:"What the grades mean",
   info_relevance:"<p><b>High:</b> direct support for a Cardinal Point through an actionable output (baseline, risk assessment, targeting, siting, early warning or monitoring) in Africa, or in a global study whose results cover African countries.</p><p><b>Medium:</b> indirect support (validation or accuracy assessment, identifying the most useful data, methodological reference or general evidence), or an application outside Africa that is transferable to African countries.</p><p><b>Low:</b> no clear link to a Cardinal Point, or not transferable to Africa.</p>",
@@ -605,7 +605,7 @@ const UI = {
   report:"Report",reportFull:"Download the report (PDF)",lastUpdated:"Last updated",showAll:"Show all"},
  fr:{datasets:"Jeux de données",usecases:"Cas d'usage",brandFull:"Glossaire des données géospatiales ouvertes · BAD DI4A",
   heroA:"Données géospatiales ouvertes",kick:"Data Innovation for Africa · Département des statistiques de la BAD",title:"Glossaire des données géospatiales ouvertes",lede:"Jeux de données géospatiales ouverts et cas d'usage documentés, <br>sélectionnés pour le <mark>développement africain</mark>.",legendH:"En un coup d'œil",secNote:"Un cas d'usage peut relever de deux secteurs au plus.",howTo:"Recherchez par mot-clé, ou parcourez par thème et secteur ci-dessous.",dsOne:"jeu de données",upd:"Dernière mise à jour",seeDs:"Tous les jeux de données",seeUc:"Tous les cas d'usage",ofTotal:"des jeux de données",heroB:"pour le développement africain",heroTag:"Trouvez un jeu de données, ou voyez comment il a été appliqué dans des cas d'usage documentés.",
-  searchAll:"Rechercher jeux de données, cas d'usage et pays…",searchShort:"Rechercher…",nDatasets:"jeux de données",nThemes:"thèmes",nUsecases:"cas d'usage",nSectors:"secteurs",
+  searchAll:"Rechercher jeux de données, cas d'usage et pays…",sortRel:"Pertinence",searchShort:"Rechercher…",nDatasets:"jeux de données",nThemes:"thèmes",nUsecases:"cas d'usage",nSectors:"secteurs",
   byTheme:"Parcourir les jeux de données par thème",bySector:"Parcourir les cas d'usage par secteur",
   highPrio:"Jeux de données prioritaires",highPrioSub:"Sélection indicative de l'équipe : les jeux de données à explorer en premier.",prioTip:"Comment la priorité est établie",infoTip:"Signification des niveaux",
   info_relevance:"<p><b>Élevée :</b> soutien direct à un point cardinal grâce à un résultat directement utilisable (situation de référence, évaluation des risques, ciblage, choix de sites, alerte précoce ou suivi) en Afrique, ou dans une étude mondiale dont les résultats couvrent des pays africains.</p><p><b>Moyenne :</b> soutien indirect (validation ou évaluation de la précision, identification des données les plus utiles, référence méthodologique ou éléments de preuve généraux), ou application hors d'Afrique transposable aux pays africains.</p><p><b>Faible :</b> aucun lien clair avec un point cardinal, ou non transposable à l'Afrique.</p>",
@@ -701,6 +701,26 @@ function band(sec,key,items){
   return `<div class="topicband"><div class="textlist">${items.map((t,i)=>(i?'<span class="sep">|</span>':'')+
     `<span class="textitem ${sel.includes(t)?'active':''}" data-band="${sec}:${key}" data-val="${esc(t)}">${esc(L(t))}</span>`).join('')}</div></div>`;
 }
+const has = (hay,q) => q.split(/\s+/).filter(Boolean).every(w=>hay.includes(w));   // every typed word must appear, in any order
+const S = x => Array.isArray(x) ? x.join(' ') : (x==null ? '' : String(x));
+const reEsc = w => w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+// Relevance: for each typed word take the best place it matches (name beats id, provider, theme, description, notes) and add up.
+function relScore(fields, words){
+  let total=0;
+  for(const w of words){
+    let best=0;
+    for(const [text,weight,isName] of fields){
+      const t=(text||'').toLowerCase(); if(!t.includes(w)) continue;
+      let sc=weight;
+      if(isName){ if(t===w) sc=weight+60; else if(t.startsWith(w)) sc=weight+20; else if(new RegExp('\\b'+reEsc(w)).test(t)) sc=weight+10; }
+      if(sc>best) best=sc;
+    }
+    total+=best;
+  }
+  return total;
+}
+const dsRel = (d,words) => relScore([[d.name,40,true],[d.id,35],[d.provider,25],[d.theme+' '+L(d.theme),20],[d.description,10],[S(d.notes),4]],words);
+const ucRel = (u,words) => relScore([[u.title,40,true],[u.id,35],[u.countries.join(' '),25],[u.sectors.join(' ')+' '+u.sectors.map(L).join(' '),20],[u.summary,10],[u.method,8],[S(u.problem),6],[S(u.outputs),4],[S(u.findings),3],[S(u.auxiliary),2],[S(u.dataCode),2]],words);
 function searchbar(sec,ph){ return `<div class="searchbox">${SVG_SEARCH}<input id="q-${sec}" placeholder="${ph}" value="${esc(state[sec].q)}"></div>`; }
 let reportUrl=null;
 function openReport(){
@@ -795,12 +815,15 @@ function dsFiltered(skip){
     (!f.format?.length || d.fmt.some(x=>f.format.includes(x))) &&
     (!f.licence?.length || f.licence.includes(d.licence)) && (!f.stars?.length || f.stars.includes(String(d.stars))) &&
     (!f.update?.length || d.upd.some(x=>f.update.includes(x))) &&
-    (!q || (d.id+' '+d.name+' '+d.provider+' '+d.description+' '+d.theme+' '+L(d.theme)).toLowerCase().includes(q)));
+    (!q || has((d.id+' '+d.name+' '+d.provider+' '+d.description+' '+d.theme+' '+L(d.theme)+' '+S(d.notes)).toLowerCase(),q)));
 }
 function renderDatasets(){
   const f=state.ds.f, list=dsFiltered();
-  const sorted=[...list].sort((a,b)=> state.ds.sort==='prio' ? b.stars-a.stars || a.name.localeCompare(b.name)
-    : state.ds.sort==='uc' ? b.useCases.length-a.useCases.length || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
+  const eff=(state.ds.q && !state.ds.manual) ? 'rel' : state.ds.sort;          // while searching, start with the best matches
+  const words=state.ds.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const sorted=[...list].sort((a,b)=> eff==='rel' ? dsRel(b,words)-dsRel(a,words) || b.stars-a.stars || b.useCases.length-a.useCases.length || a.name.localeCompare(b.name)
+    : eff==='prio' ? b.stars-a.stars || a.name.localeCompare(b.name)
+    : eff==='uc' ? b.useCases.length-a.useCases.length || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
   const any = Object.values(f).some(a=>a.length) || state.ds.q;
   return `<div class="pagehead"><h1>${T('datasets')}</h1><p>${T('dsLead')}</p>${contentNote()}</div>
   ${band('ds','theme',DATA.themes.map(t=>t.name))}
@@ -815,7 +838,7 @@ function renderDatasets(){
   </div><div>
     <div class="toolbar">${searchbar('ds',T('dsSearch'))}</div>
     <div class="toolbar"><span class="resultcount">${list.length} ${T('of')} ${DATA.datasets.length} ${T('nDatasets')}</span>
-      <span class="sortctrl" style="margin-left:auto">${T('sort')}: <button data-sort="ds:az" class="${state.ds.sort==='az'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('az')}</button><button data-sort="ds:prio" class="${state.ds.sort==='prio'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('priority')}</button><button data-sort="ds:uc" class="${state.ds.sort==='uc'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('ucCount')}</button></span>${viewToggle('ds')}</div>
+      <span class="sortctrl" style="margin-left:auto">${T('sort')}: ${state.ds.q?`<button data-sort="ds:rel" class="${eff==='rel'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('sortRel')}</button>`:''}<button data-sort="ds:az" class="${eff==='az'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('az')}</button><button data-sort="ds:prio" class="${eff==='prio'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('priority')}</button><button data-sort="ds:uc" class="${eff==='uc'&&!(state.view.ds==='list'&&state.tsort.ds)?'active':''}">${T('ucCount')}</button></span>${viewToggle('ds')}</div>
     ${!sorted.length?`<div class="emptystate">${T('noDs')}</div>`: state.view.ds==='list' ? dsTable(sorted) : `<div class="cardgrid">${sorted.map(dsCard).join('')}</div>`}
   </div></div>`;
 }
@@ -861,12 +884,15 @@ function ucFiltered(skip){
     (!f.type?.length || u.types.some(t=>f.type.includes(t))) &&
     (!f.year?.length || f.year.includes(u.year)) &&
     (!f.country?.length || u.countries.some(c=>f.country.includes(c))) &&
-    (!q || (u.id+' '+u.title+' '+u.summary+' '+u.countries.join(' ')+' '+u.method+' '+u.sectors.join(' ')+' '+u.sectors.map(L).join(' ')).toLowerCase().includes(q)));
+    (!q || has((u.id+' '+u.title+' '+u.summary+' '+u.countries.join(' ')+' '+u.method+' '+u.sectors.join(' ')+' '+u.sectors.map(L).join(' ')+' '+S(u.problem)+' '+S(u.findings)+' '+S(u.outputs)+' '+S(u.auxiliary)+' '+S(u.dataCode)).toLowerCase(),q)));
 }
 function renderUseCases(){
   const f=state.uc.f, list=ucFiltered();
-  const dir = state.uc.sort==='old' ? -1 : 1;
-  const sorted=[...list].sort((a,b)=> dir*(b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
+  const eff=(state.uc.q && !state.uc.manual) ? 'rel' : state.uc.sort;
+  const dir = eff==='old' ? -1 : 1;
+  const words=state.uc.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const sorted=[...list].sort((a,b)=> eff==='rel' ? ucRel(b,words)-ucRel(a,words) || (b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id)
+    : dir*(b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
   const cnt=(fn)=>DATA.usecases.filter(fn).length;
   const cntK=(key,fn)=>ucFiltered(key).filter(fn).length;  // facet count: all other active filters applied
   const sectors=Object.keys(SECTOR_COLORS).filter(s=>cnt(u=>u.sectors.includes(s)));
@@ -881,7 +907,7 @@ function renderUseCases(){
   <div class="cphead">${T('cpTitle')}</div>
   <div class="cprow">${DATA.cps.map(c=>`<div class="cpbtn ${cpsel.includes(c.code)?'active':''}" data-band="uc:cp" data-val="${c.code}" title="${esc(cpName(c))}"><b>${c.code}</b>${esc(cpName(c))}</div>`).join('')}</div>
   <div class="layout"><div class="filterpanel">
-    ${tierGroup('relevanceTier',T('relevance')+ibtn('relevance'))}${tierGroup('replicabilityTier',T('replicability')+ibtn('replicability'))}${tierGroup('difficultyTier',T('difficulty')+ibtn('difficulty'))}
+    ${tierGroup('relevanceTier',T('sortRel')+ibtn('relevance'))}${tierGroup('replicabilityTier',T('replicability')+ibtn('replicability'))}${tierGroup('difficultyTier',T('difficulty')+ibtn('difficulty'))}
     <hr class="fdiv">
     ${group('uc','type',T('type'),checklist('uc','type',types.map(t=>({value:t,label:L(t),count:cntK('type',u=>u.types.includes(t))}))))}
     ${group('uc','year',T('year'),checklist('uc','year',years.map(y=>({value:y,label:y,count:cntK('year',u=>u.year===y)}))))}
@@ -890,7 +916,7 @@ function renderUseCases(){
   </div><div>
     <div class="toolbar">${searchbar('uc',T('ucSearch'))}</div>
     <div class="toolbar"><span class="resultcount">${list.length} ${T('of')} ${DATA.usecases.length} ${T('nUsecases')}</span>
-      <span class="sortctrl" style="margin-left:auto">${T('sort')}: <select id="ucsort"><option value="new"${state.uc.sort!=='old'?' selected':''}>${T('newest')}</option><option value="old"${state.uc.sort==='old'?' selected':''}>${T('oldest')}</option></select></span>${viewToggle('uc')}</div>
+      <span class="sortctrl" style="margin-left:auto">${T('sort')}: <select id="ucsort">${state.uc.q?`<option value="rel"${eff==='rel'?' selected':''}>${T('sortRel')}</option>`:''}<option value="new"${eff==='new'?' selected':''}>${T('newest')}</option><option value="old"${eff==='old'?' selected':''}>${T('oldest')}</option></select></span>${viewToggle('uc')}</div>
     ${!sorted.length?`<div class="emptystate">${T('noUc')}</div>`: state.view.uc==='list' ? ucTable(sorted) : `<div class="cardgrid">${sorted.map(ucCard).join('')}</div>`}
   </div></div>`;
 }
@@ -938,6 +964,9 @@ function renderSearch(q){
   resetList('ds'); resetList('uc');
   state.ds.q=q; state.uc.q=q;
   const d=dsFiltered(), u=ucFiltered();
+  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  d.sort((a,b)=> dsRel(b,words)-dsRel(a,words) || b.stars-a.stars || b.useCases.length-a.useCases.length || a.name.localeCompare(b.name));
+  u.sort((a,b)=> ucRel(b,words)-ucRel(a,words) || (b.year||'').localeCompare(a.year||'') || a.id.localeCompare(b.id));
   return `<div class="searchband"><h1>${T('results')} “${esc(q)}”</h1><div class="pagesearch">${SVG_SEARCH}<input id="srchq" type="search" value="${esc(q)}" placeholder="${T('searchAll')}"></div></div>
    <div class="sect" style="border:0;padding:0"><h4>${T('datasets')} (${d.length}) · <a href="#/datasets" class="openin" data-open="datasets">${T('openIn')} ${T('datasets')} →</a></h4>${d.length?dsTable(d.slice(0,12)):`<div class="emptystate">${T('none')}</div>`}</div>
    <div class="sect"><h4>${T('usecases')} (${u.length}) · <a href="#/usecases" class="openin" data-open="usecases">${T('openIn')} ${T('usecases')} →</a></h4>${u.length?ucTable(u.slice(0,12)):`<div class="emptystate">${T('none')}</div>`}</div>`;
@@ -989,8 +1018,8 @@ function bind(){
   document.querySelectorAll('input[data-key]').forEach(el=>el.onchange=()=>{toggle(el.dataset.sec,el.dataset.key,el.dataset.val);router();});
   document.querySelectorAll('[data-band]').forEach(el=>el.onclick=()=>{const [s,k]=el.dataset.band.split(':');toggle(s,k,el.dataset.val);router();});
   document.querySelectorAll('[data-gt]').forEach(el=>el.onclick=()=>{const [s,k]=el.dataset.gt.split(':');const o=state[s].open;o[k]=!(el.parentElement.classList.contains('collapsed')?false:true);router();});
-  document.querySelectorAll('[data-sort]').forEach(el=>el.onclick=()=>{const [s,v]=el.dataset.sort.split(':');state[s].sort=v;state.tsort[s]=null;router();});
-  const us=document.getElementById('ucsort'); if(us) us.onchange=()=>{state.uc.sort=us.value;state.tsort.uc=null;router();};
+  document.querySelectorAll('[data-sort]').forEach(el=>el.onclick=()=>{const [s,v]=el.dataset.sort.split(':');state[s].sort=v;state[s].manual=true;state.tsort[s]=null;router();});
+  const us=document.getElementById('ucsort'); if(us) us.onchange=()=>{state.uc.sort=us.value;state.uc.manual=true;state.tsort.uc=null;router();};
   document.querySelectorAll('[data-clear]').forEach(el=>el.onclick=()=>{const s=el.dataset.clear;state[s].f={};state[s].q='';router();});
   document.querySelectorAll('.groupsearch').forEach(el=>el.oninput=()=>{state.gq[el.dataset.gq]=el.value;router();});
   ['ds','uc'].forEach(s=>{const el=document.getElementById('q-'+s); if(el) el.oninput=()=>{state[s].q=el.value;router();};});
