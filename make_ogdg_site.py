@@ -493,20 +493,23 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 @media(min-width:641px) and (max-width:860px){.sheet h1{font-size:36px}}
 @media(max-width:640px){.sheet h1{font-size:28px}}
 
-/* ---- palette B: report sage ---- */
-:root{--paper:#f6f7f4;--line:#dfe4e0;--gold:#9a6b3c;--contour:#486d58;--sage:#486d58;--sage-ink:#2f4a3b;--cream:#f1e3cf}
+/* ---- palette: original site colours (deep green + gold) ---- */
+:root{--accent:#e0a467;--contour:#cfe0d4}
 .searchband{background:#fff}
-
-body{background:var(--paper)} header.topbar{background:var(--sage)}
-.brand .logo{color:var(--cream)}
-.langtoggle button.active{background:var(--cream);border-color:var(--cream);color:var(--sage-ink)}
-nav.tabs button.active{border-bottom-color:var(--cream)}
-.topsearch input:focus{outline-color:var(--cream)} .reportbtn:hover{border-color:var(--cream)}
-.sheet{background:#fff;border-bottom:1px solid var(--line)}.sheet .topo{opacity:.18}
-.sheet h1,.homesection h2,.legend .row b,.ttile .tn,.secgrid .sc b{color:var(--sage-ink)}
-.legend{border-color:var(--sage)}.legend::before,.legend::after{border-color:var(--sage)}
-.sechead{border-bottom-color:var(--sage)}
-.ttile .bar i{background:var(--sage)}.ttile:hover{background:var(--sage)}.ttile:hover .bar i{background:var(--cream)}
+header.topbar{background:var(--green-deep);border-bottom:1px solid rgba(255,255,255,.08)}
+.sheet{background:var(--green-deep);border-bottom:0}.sheet .topo{opacity:.16}
+.sheet .kick{color:var(--accent)}
+.sheet h1{color:#fff}.sheet h1 .accent{color:var(--accent)}
+.sheet .lede{color:rgba(255,255,255,.88)}.sheet .stamp{color:rgba(255,255,255,.6)}
+.sheet .herosearch input{border:0;border-radius:8px}
+.legend{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.4)}
+.legend::before,.legend::after{border-color:rgba(255,255,255,.4)}
+.legend .lh{color:rgba(255,255,255,.65);border-bottom-color:rgba(255,255,255,.2)}
+.legend .row{border-bottom-color:rgba(255,255,255,.16)}.legend .row span{color:rgba(255,255,255,.78)}.legend .row b{color:#fff}
+.legend .row:hover span{color:var(--accent)}
+.sechead{border-bottom-color:var(--green-deep)}
+.homesection h2,.ttile .tn,.secgrid .sc b{color:var(--green-deep)}
+.ttile .bar i{background:var(--green)}.ttile:hover{background:var(--green-deep)}.ttile:hover .bar i{background:var(--accent)}
 
 /* ---- home: hero back to about 400 px, tiles keep "N datasets" + bar, brown code/number row removed ---- */
 @media(min-width:861px){.sheet h1{font-size:42px}}
