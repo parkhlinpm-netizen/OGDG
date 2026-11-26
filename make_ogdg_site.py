@@ -495,7 +495,7 @@ nav.tabs button.active{background:transparent;color:#fff;border-bottom-color:#e0
 
 /* ---- palette: original site colours (deep green + gold) ---- */
 :root{--accent:#e0a467;--contour:#cfe0d4}
-.searchband{background:#fff}
+.searchband{background:transparent;border:0;border-radius:0;padding:12px 20px 22px;margin:0 0 18px;border-bottom:1px solid var(--line)}
 header.topbar{background:var(--green-deep);border-bottom:1px solid rgba(255,255,255,.08)}
 .sheet{background:var(--green-deep);border-bottom:0}.sheet .topo{opacity:.16}
 .sheet .kick{color:var(--accent)}
